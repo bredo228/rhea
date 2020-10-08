@@ -1,6 +1,6 @@
 {
   "name": "rhea",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Moderation/Music Discord Bot",
   "main": "index.js",
   "scripts": {

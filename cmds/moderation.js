@@ -5,7 +5,6 @@ const DataStore = require('../db/sqlite');
 function getUserFromMention(mention) {
 	if (!mention) return;
 
-    console.log(mention)
 	if (mention.startsWith('<@') && mention.endsWith('>')) {
 		mention = mention.slice(2, -1);
 
@@ -13,7 +12,6 @@ function getUserFromMention(mention) {
 			mention = mention.slice(1);
 		}
 
-        console.log(mention)
 		return mention;
 	}
 }
@@ -47,6 +45,16 @@ module.exports.commands['warn'] = {
             // User doesn't exist.
             return message.channel.send('**FAIL**: User is not a member of this guild.')
         }
+
+        var user = message.guild.member(uid);
+
+        //console.log(message.member)
+        if (message.author.id != message.guild.owner.id) {
+            if (message.member.roles.highest.comparePositionTo(user.roles.highest) <= 0) {
+                // Oop.
+                return message.channel.send('**FAIL**: Cannot kick as user has higher role than you.')
+            }
+        } 
 
         let reasonMsg = args.slice(1,args.length).join(" ");
 
@@ -356,6 +364,15 @@ module.exports.commands['kick'] = {
             return message.channel.send('**FAIL**: User is not a member of this guild.')
         }
 
+        var user = message.guild.member(uid);
+
+        if (message.author.id != message.guild.owner.id) {
+            if (message.member.roles.highest.comparePositionTo(user.roles.highest) <= 0) {
+                // Oop.
+                return message.channel.send('**FAIL**: Cannot kick as user has higher role than you.')
+            }
+        } 
+
         // Kick the user.
 
         let reasonMsg = args.slice(1,args.length).join(" ");
@@ -418,10 +435,15 @@ module.exports.commands['ban'] = {
             return message.channel.send('**FAIL**: User is not a member of this guild.');
         }
 
-        if (message.member.highestRole.comparePositionTo(client.users.cache.get(uid).highestRole) <= 0) {
-            // 
-        }
-        
+        var user = message.guild.member(uid);
+
+        if (message.author.id != message.guild.owner.id) {
+            if (message.member.roles.highest.comparePositionTo(user.roles.highest) <= 0) {
+                // Oop.
+                return message.channel.send('**FAIL**: Cannot kick as user has higher role than you.')
+            }
+        } 
+
         // Kick the user.
 
         let reasonMsg = args.slice(1,args.length).join(" ");

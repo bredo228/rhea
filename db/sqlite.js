@@ -148,7 +148,7 @@ module.exports = function(guildID) {
         return new Promise ( (resolve, reject) => {
             try {
                 let stmt = db.prepare('SELECT value FROM config WHERE property = ?').all(property);
-                console.log(stmt)
+                //console.log(stmt)
                 resolve(stmt);
             } catch (err) {
                 console.log(err);
