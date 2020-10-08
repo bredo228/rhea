@@ -418,6 +418,10 @@ module.exports.commands['ban'] = {
             return message.channel.send('**FAIL**: User is not a member of this guild.');
         }
 
+        if (message.member.highestRole.comparePositionTo(client.users.cache.get(uid).highestRole) <= 0) {
+            // 
+        }
+        
         // Kick the user.
 
         let reasonMsg = args.slice(1,args.length).join(" ");
