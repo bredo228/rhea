@@ -1,0 +1,16 @@
+{
+  "name": "rhea",
+  "version": "0.0.1",
+  "description": "Moderation/Music Discord Bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ."
+  },
+  "author": "Funey",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^7.1.1",
+    "discord.js": "^12.3.1",
+    "socket.io": "^2.3.0"
+  }
+}
