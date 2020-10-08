@@ -6,7 +6,7 @@
 const Database = require('better-sqlite3');
 
 module.exports = function(guildID) {
-    const db = new Database('./datastore/' + guildID + '.db', { verbose: console.log });
+    const db = new Database('./datastore/' + guildID + '.db');
 
     // Initialise this guild's DataStore if it doesn't exist.
     db.exec(`CREATE TABLE IF NOT EXISTS "infractions" (
