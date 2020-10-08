@@ -35,7 +35,7 @@ module.exports.commands['warn'] = {
         var uid = args[0]
 
         if (args[0].length != 18) {
-            console.log("poo")
+            //console.log("poo")
             uid = getUserFromMention(args[0]);
         }
 
