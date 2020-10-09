@@ -21,3 +21,52 @@ module.exports.commands['wb-change'] = {
         })
     }
 }
+
+module.exports.commands['infractionlog'] = {
+    'pretty_name': 'infractionlog <channel-id>',
+    'description': 'Change the infraction log channel for this guild.',
+    'exec_function': function(message, args, Discord, client) {
+        if (!message.member.hasPermission('ADMINISTRATOR')) return message.channel.send('**FAIL**: Insufficient permissions.');
+        args[0] = args[0] || "0";
+
+        // User is an admin.
+        let Store = new DataStore(message.guild.id);
+
+        Store.updateObject('infraction-log', args[0]).then( () => {
+            message.channel.send('**SUCCESS**: Infraction log channel updated successfully!');
+        })
+    }
+}
+
+module.exports.commands['joinlog'] = {
+    'pretty_name': 'joinlog <channel-id>',
+    'description': 'Change the join log channel for this guild.',
+    'exec_function': function(message, args, Discord, client) {
+        if (!message.member.hasPermission('ADMINISTRATOR')) return message.channel.send('**FAIL**: Insufficient permissions.');
+        args[0] = args[0] || "0";
+
+        // User is an admin.
+        let Store = new DataStore(message.guild.id);
+
+        Store.updateObject('join-log', args[0]).then( () => {
+            message.channel.send('**SUCCESS**: Join log channel updated successfully!')
+        })
+    }
+}
+
+
+module.exports.commands['messagelog'] = {
+    'pretty_name': 'messagelog <channel-id>',
+    'description': 'Change the message log channel for this guild.',
+    'exec_function': function(message, args, Discord, client) {
+        if (!message.member.hasPermission('ADMINISTRATOR')) return message.channel.send('**FAIL**: Insufficient permissions.');
+        args[0] = args[0] || "0";
+
+        // User is an admin.
+        let Store = new DataStore(message.guild.id);
+
+        Store.updateObject('message-log', args[0]).then( () => {
+            message.channel.send('**SUCCESS**: Message log channel updated successfully!')
+        })
+    }
+}

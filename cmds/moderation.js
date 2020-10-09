@@ -65,6 +65,8 @@ module.exports.commands['warn'] = {
         Store.addInfraction(uid, message.author.id, "warn", reasonMsg).then( (infractionID) => {
             message.channel.send(`**SUCCESS:** User ${uid} warned successfully.`)
 
+            let warnedUser = client.users.cache.get(uid);
+
             let WarnEmbed = new Discord.MessageEmbed()
             .setColor('#ff0000')
             .setTitle('New Infraction')
@@ -74,7 +76,21 @@ module.exports.commands['warn'] = {
             .addField('Infraction ID', infractionID, true)
             .addField('Reason', reasonMsg , true);
 
-            client.users.cache.get(uid).send(WarnEmbed).then( () => {
+            Store.getObject('infraction-log').then( (v) => {
+                let InfractionEmbed = new Discord.MessageEmbed()
+                    .setColor('#ff0000')
+                    .setTitle('New warning for ' + warnedUser.tag)
+                    .setAuthor(client.CONFIG.botName, client.CONFIG.botPicture)
+                    .addField('Punished', warnedUser.tag + " (" + warnedUser.id + ")" , true)
+                    .addField('Punisher', message.author.tag + " (" + message.author.id + ")", true)
+                    .addField('Reason', reasonMsg , true);
+
+                client.guilds.cache.get(message.guild.id).channels.cache.get(v[0].value.toString()).send(InfractionEmbed);
+                
+            });
+
+            
+            warnedUser.send(WarnEmbed).then( () => {
                 // Do nothing.
             }).catch( (err) => {
                 // Do nothing.
@@ -391,6 +407,21 @@ module.exports.commands['kick'] = {
             .addField('Infraction ID', infractionID, true)
             .addField('Reason', reasonMsg , true);
 
+            let warnedUser = client.users.cache.get(uid);
+
+            Store.getObject('infraction-log').then( (v) => {
+                let InfractionEmbed = new Discord.MessageEmbed()
+                    .setColor('#ff0000')
+                    .setTitle(warnedUser.tag + " kicked")
+                    .setAuthor(client.CONFIG.botName, client.CONFIG.botPicture)
+                    .addField('Punished', warnedUser.tag + " (" + warnedUser.id + ")" , true)
+                    .addField('Punisher', message.author.tag + " (" + message.author.id + ")", true)
+                    .addField('Reason', reasonMsg , true);
+
+                client.guilds.cache.get(message.guild.id).channels.cache.get(v[0].value.toString()).send(InfractionEmbed);
+                
+            });
+
             client.users.cache.get(uid).send(KickEmbed).then( () => {
                 // Try kicking user.
                 message.guild.members.cache.get(uid).kick(reasonMsg).then( () => {
@@ -461,6 +492,21 @@ module.exports.commands['ban'] = {
             .addField('Type', 'ban', true)
             .addField('Infraction ID', infractionID, true)
             .addField('Reason', reasonMsg , true);
+
+            let warnedUser = client.users.cache.get(uid);
+            
+            Store.getObject('infraction-log').then( (v) => {
+                let InfractionEmbed = new Discord.MessageEmbed()
+                    .setColor('#ff0000')
+                    .setTitle(warnedUser.tag + " kicked")
+                    .setAuthor(client.CONFIG.botName, client.CONFIG.botPicture)
+                    .addField('Punished', warnedUser.tag + " (" + warnedUser.id + ")" , true)
+                    .addField('Punisher', message.author.tag + " (" + message.author.id + ")", true)
+                    .addField('Reason', reasonMsg , true);
+
+                client.guilds.cache.get(message.guild.id).channels.cache.get(v[0].value.toString()).send(InfractionEmbed);
+                
+            });
 
             client.users.cache.get(uid).send(BanEmbed).then( () => {
                 // Try kicking user.

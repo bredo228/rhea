@@ -21,7 +21,7 @@ module.exports = function(guildID) {
 
     db.exec(`CREATE TABLE IF NOT EXISTS "config" (
         "property"	TEXT,
-        "value"	INTEGER,
+        "value"	TEXT,
         PRIMARY KEY ("property")
     );`)
 
