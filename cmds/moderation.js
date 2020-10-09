@@ -511,7 +511,7 @@ module.exports.commands['ban'] = {
             client.users.cache.get(uid).send(BanEmbed).then( () => {
                 // Try kicking user.
                 message.guild.members.cache.get(uid).ban().then( () => {
-                    message.channel.send('**SUCCESS**: User baned successfully.');
+                    message.channel.send('**SUCCESS**: User banned successfully.');
                 }).catch( (err) => {
                     message.channel.send('**FAIL:** Could not ban user - they will, however, have a ban infraction.')
                     console.log(err);
@@ -519,7 +519,7 @@ module.exports.commands['ban'] = {
             }).catch( (err) => {
                 message.channel.send('*User does not have DMs open for this server or has blocked the bot - they will not receive any notification.*');
                 message.guild.members.cache.get(uid).ban().then( () => {
-                    message.channel.send('**SUCCESS**: User kicked successfully.');
+                    message.channel.send('**SUCCESS**: User banned successfully.');
                 }).catch( () => {
                     message.channel.send('**FAIL:** Could not ban user - they will, however, have a ban infraction.')
                 })

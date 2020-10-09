@@ -18,8 +18,8 @@ function getUserFromMention(mention) {
 
 
 module.exports = {
-    'name': 'JOke',
-    'description': 'JOke commands.',
+    'name': 'Joke',
+    'description': 'Joke commands.',
     'commands': {}
 }
 
@@ -29,7 +29,7 @@ module.exports.commands['jwarn'] = {
     'exec_function': function(message, args, Discord, client) {
         // Check if user ID is present.
         if (args[0] === undefined) return message.channel.send('**ERROR: Need to specify user ID.**');
-        //if (!message.member.hasPermission('KICK_MEMBERS')) return message.channel.send('**FAIL**: Insufficient permissions.')
+        if (!message.member.hasPermission('KICK_MEMBERS')) return message.channel.send('**FAIL**: Insufficient permissions.')
 
         var uid = args[0]
 
@@ -80,6 +80,7 @@ module.exports.commands['jkick'] = {
     'exec_function': async function(message, args, Discord, client) {
         //if (!message.member.hasPermission('KICK_MEMBERS')) return message.channel.send('**FAIL**: Lack of permissions.')
         if (args[0] === undefined) return message.channel.send('**FAIL:** Must provide user ID to kick.');
+        if (!message.member.hasPermission('KICK_MEMBERS')) return message.channel.send('**FAIL**: Insufficient permissions.')
 
         var uid = args[0];
 
@@ -132,6 +133,7 @@ module.exports.commands['jban'] = {
     'exec_function': async function(message, args, Discord, client) {
         //if (!message.member.hasPermission('BAN_MEMBERS')) return message.channel.send('**FAIL**: Lack of permissions.')
         if (args[0] === undefined) return message.channel.send('**FAIL:** Must provide user ID to ban.');
+        if (!message.member.hasPermission('KICK_MEMBERS')) return message.channel.send('**FAIL**: Insufficient permissions.')
 
         var uid = args[0];
 
@@ -170,9 +172,9 @@ module.exports.commands['jban'] = {
 
         client.users.cache.get(uid).send(BanEmbed).then( () => {
             // Try kicking user.
-            message.channel.send('**SUCCESS**: User baned successfully.');
+            message.channel.send('**SUCCESS**: User banned successfully.');
         }).catch( (err) => {
-            message.channel.send('**SUCCESS**: User baned successfully.');
+            message.channel.send('**SUCCESS**: User banned successfully.');
         })
         
     }
