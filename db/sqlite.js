@@ -21,7 +21,7 @@ module.exports = function(guildID) {
 
     db.exec(`CREATE TABLE IF NOT EXISTS "config" (
         "property"	TEXT,
-        "value"	INTEGER,
+        "value"	TEXT,
         PRIMARY KEY ("property")
     );`)
 
@@ -127,13 +127,14 @@ module.exports = function(guildID) {
     this.updateObject = function(property, value) {
         return new Promise( (resolve, reject) => {
             try {
+                let val = value.toString();
                 db.prepare(`
                 INSERT INTO config (property, value) 
                     VALUES (?, ?)
                     ON CONFLICT (property) DO UPDATE SET
                         value = excluded.value
                     WHERE property = ?
-                `).run(property, value.toString(), property)
+                `).run(property, val, property)
 
                 resolve();
             } catch {
