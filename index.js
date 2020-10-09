@@ -178,7 +178,7 @@ client.on('messageUpdate', (oldmsg, newmsg) => {
     }).catch( (err) => {
         console.log(err);
     })
-    
+
     Store.getObject('word-blacklist').then ( (blacklistwords) => {
         let blacklisted = blacklistwords[0].value.split(',');
         var MessageDeleted = false;
@@ -304,9 +304,9 @@ client.on('guildMemberRemove', (member) => {
 
 client.on('messageDelete', (msg) => {
 
-    if (message.author.bot) return;
+    if (msg.author.bot) return;
 
-    if (message.guild.id === null) return; // Potential API issue?
+    if (msg.guild.id === null) return; // Potential API issue?
 
     let Store = new DataStore(msg.guild.id);
 
@@ -372,7 +372,28 @@ if (client.CONFIG.enableWebsocket) {
                     socket.emit('command_output', "Reconnect OK.")
                     socket.emit('command_done');
                 })
-    
+            } else if (data.cmd == "get-property") {
+                if (!data.args[0] || data.args[0].length != 18) {
+                    socket.emit('command_output', "Usage: get-property <guild-id> <property-name>"); 
+                    return socket.emit('command_done');
+                }
+
+                if (!data.args[1]) {
+                    socket.emit('command_output', "Usage: get-property <guild-id> <property-name>"); 
+                    return socket.emit('command_done');
+                }
+
+                let Store = new DataStore(data.args[0]);
+
+                Store.getObject(data.args[1]).then( (v) => {
+                    socket.emit('command_output', data.args[0] + ": " + data.args[1] + " = " + v[0].value);
+                    return socket.emit('command_done');
+                }).catch( (err) => {
+                    // Error.
+                    socket.emit('command_error', "Failed to get property " + data.args[1] + " for guild ID " + data.args[0] + ".");
+                    return socket.emit('command_done');
+                })
+                
             } else if (data.cmd == "stop") {
                 socket.emit('command_output', "Stopping...");
                 client.destroy();
