@@ -156,6 +156,68 @@ client.on('message', (message) => {
     });
 })
 
+client.on('guildMemberUpdate', (olduser, newuser) => {
+    if (newuser.guild === null) return;
+    let Store = new DataStore(newuser.guild.id)
+
+    Store.getObject('word-blacklist').then ( (blacklistwords) => {
+        let blacklisted = blacklistwords[0].value.split(',');
+        var MessageDeleted = false;
+
+        blacklisted.forEach( (blacklistWord) => {
+            if (newuser.user.tag.includes(blacklistWord)) {
+                // Whoops naughty.
+                //newmsg.delete();
+                MessageDeleted = true;
+            }
+        })
+
+        if (MessageDeleted) {
+
+            // Add infraction.
+            //var msg = oldmsg;
+            Store.addInfraction(newuser.id, client.user.id, 'warn', '[AUTOMOD] Nickname word blacklist.').then( (infractionID) => {
+                let WarnEmbed = new Discord.MessageEmbed()
+                .setColor('#ff0000')
+                .setTitle('New Infraction')
+                .setAuthor(client.CONFIG.botName, client.CONFIG.botPicture)
+                .setDescription('You have received an infraction in ' + newuser.guild.name + '.')
+                .addField('Type', 'warn', true)
+                .addField('Infraction ID', infractionID, true)
+                .addField('Reason', '[AUTOMOD] Nickname word blacklist.' , true);
+    
+
+                let warnedUser = client.users.cache.get(newuser.id);
+            
+                Store.getObject('infraction-log').then( (v) => {
+                    let InfractionEmbed = new Discord.MessageEmbed()
+                        .setColor('#ff0000')
+                        .setTitle('New warning for ' + newuser.user.tag)
+                        .setAuthor(client.CONFIG.botName, client.CONFIG.botPicture)
+                        .addField('Punished', newuser.user.tag + " (" + newuser.user.id + ")" , true)
+                        .addField('Punisher', client.user.tag + " (" + client.user.id + ")", true)
+                        .addField('Reason', '[AUTOMOD] Nickname word blacklist.' , true);
+    
+                    client.guilds.cache.get(newuser.guild.id).channels.cache.get(v[0].value.toString()).send(InfractionEmbed);
+                    
+                });
+
+                client.users.cache.get(newuser.id).send(WarnEmbed).then( () => {
+                    // Do nothing.
+                }).catch( (err) => {
+                    // Do nothing.
+                    console.log(err)
+                })
+    
+            })
+        } else {
+
+        }
+    }).catch ( (err) => {
+        console.log(err)
+    });
+})
+
 client.on('messageUpdate', (oldmsg, newmsg) => {
     if (newmsg.guild === null) return;
     let Store = new DataStore(newmsg.guild.id)

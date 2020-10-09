@@ -74,3 +74,46 @@ module.exports.commands['profile'] = {
 
     }
 }
+
+module.exports.commands['avatar'] = {
+    'pretty_name': 'avatar [user ID/mention]',
+    'description': 'Get avatar of a user.',
+    'exec_function': function(message, args, Discord, client) {
+        if (args[0] === undefined) args[0] = message.author.id;
+
+        if (message.mentions.members.first()) {
+            // Is mention.
+            args[0] = message.mentions.members.first().id
+        } else {
+            // Check if user ID is the message author first, otherwise don't do anything
+            if (args[0] != message.author.id) {
+                // Is a standard args[1] id. but check first.
+                if (args[0].length != 18) {
+                    args[0] = message.author.id
+                } else {
+                    // Is an actual ID!
+                    args[0] = args[0]
+                }
+            }
+        }
+
+        // User has permission.
+        var VerifyUserExists = client.users.cache.some(user => user.id === args[0]);
+
+        if (!VerifyUserExists) {
+            // User doesn't exist.
+            return message.channel.send('**FAIL**: User is not a member of this guild.')
+        }
+
+        var user = message.guild.member(args[0]);
+
+        const profileEmbed = new Discord.MessageEmbed()
+            .setColor('7289da')
+            .setAuthor(`${user.user.tag}'s Avatar`)
+            .setImage(user.user.displayAvatarURL())
+            .setTimestamp();
+
+        message.channel.send(profileEmbed);
+
+    }
+}
