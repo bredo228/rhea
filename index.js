@@ -393,6 +393,27 @@ if (client.CONFIG.enableWebsocket) {
                     socket.emit('command_error', "Failed to get property " + data.args[1] + " for guild ID " + data.args[0] + ".");
                     return socket.emit('command_done');
                 })
+            } else if (data.cmd == "set-property") {
+                if (!data.args[0] || data.args[0].length != 18) {
+                    socket.emit('command_output', "Usage: set-property <guild-id> <property-name> <value>"); 
+                    return socket.emit('command_done');
+                }
+
+                if (!data.args[1]) {
+                    socket.emit('command_output', "Usage: set-property <guild-id> <property-name> <value>"); 
+                    return socket.emit('command_done');
+                }
+
+                let Store = new DataStore(data.args[0]);
+
+                Store.updateObject(data.args[1], data.args[2]).then( () => {
+                    socket.emit('command_output', data.args[0] + ": " + data.args[1] + " is now set to " + data.args[2]);
+                    return socket.emit('command_done');
+                }).catch( (err) => {
+                    // Error.
+                    socket.emit('command_error', "Failed to set property " + data.args[1] + " to " + data.args[2] + " for guild ID " + data.args[0] + ".");
+                    return socket.emit('command_done');
+                })
                 
             } else if (data.cmd == "stop") {
                 socket.emit('command_output', "Stopping...");
@@ -402,7 +423,7 @@ if (client.CONFIG.enableWebsocket) {
                 socket.disconnect();
                 process.exit(0);
             } else if (data.cmd == "help") {
-                socket.emit('command_output', "Rhea Help\n---------\n\nhelp - Get this message\nreconnect [token] - reconnect. if token specified, will reconnect using that token.\nping - ping the bot\nstop - stop the bot\ninfo - get connection info\nexit - exit the Rhea CLI")
+                socket.emit('command_output', "Rhea Help\n---------\n\nhelp - Get this message\nreconnect [token] - reconnect. if token specified, will reconnect using that token.\nping - ping the bot\nstop - stop the bot\ninfo - get connection info\nset-property <guild-id> <property> <value> - set the value of a property of a guild.\nget-property <guild-id> <property> - get the value of a property of a guild.\nexit - exit the Rhea CLI")
                 socket.emit('command_done')
             } else if (data.cmd == "info") {
                 if (client.user === null) {
