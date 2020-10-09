@@ -494,7 +494,7 @@ module.exports.commands['ban'] = {
             .addField('Reason', reasonMsg , true);
 
             let warnedUser = client.users.cache.get(uid);
-            
+
             Store.getObject('infraction-log').then( (v) => {
                 let InfractionEmbed = new Discord.MessageEmbed()
                     .setColor('#ff0000')
