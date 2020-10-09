@@ -21,7 +21,7 @@ module.exports = function(guildID) {
 
     db.exec(`CREATE TABLE IF NOT EXISTS "config" (
         "property"	TEXT,
-        "value"	TEXT,
+        "value"	INTEGER,
         PRIMARY KEY ("property")
     );`)
 
@@ -133,7 +133,7 @@ module.exports = function(guildID) {
                     ON CONFLICT (property) DO UPDATE SET
                         value = excluded.value
                     WHERE property = ?
-                `).run(property, value, property)
+                `).run(property, value.toString(), property)
 
                 resolve();
             } catch {
