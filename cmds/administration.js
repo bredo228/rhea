@@ -70,3 +70,19 @@ module.exports.commands['messagelog'] = {
         })
     }
 }
+
+module.exports.commands['archivechannel'] = {
+    'pretty_name': 'archivechannel <channel-id>',
+    'description': 'Change the archive channel for this guild.',
+    'exec_function': function(message, args, Discord, client) {
+        if (!message.member.hasPermission('ADMINISTRATOR')) return message.channel.send('**FAIL**: Insufficient permissions.');
+        args[0] = args[0] || "0";
+
+        // User is an admin.
+        let Store = new DataStore(message.guild.id);
+
+        Store.updateObject('archive-channel', args[0]).then( () => {
+            message.channel.send('**SUCCESS**: Archive channel updated successfully!');
+        })
+    }
+}
