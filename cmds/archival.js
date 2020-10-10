@@ -7,6 +7,7 @@ module.exports = {
 }
 
 const DataStore = require('../db/sqlite');
+const sleep = require('util').promisify(setTimeout);
 
 module.exports.commands['archive-pins'] = {
     'pretty_name': 'archive-pins',
@@ -105,6 +106,7 @@ module.exports.commands['archive-pins'] = {
                                     }
                                     
                                     Holding.clear();
+                                    sleep(2000);
                                 }
                             })
                             
