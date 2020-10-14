@@ -72,7 +72,7 @@ client.on('message', (message) => {
 
     // Check the word blacklist.
 
-    if (message.guild.id === null) return; // Potential API issue?
+    if (message.guild === null) return; // Potential API issue?
 
     let Store = new DataStore(message.guild.id)
 
