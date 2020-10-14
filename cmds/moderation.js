@@ -1,6 +1,8 @@
 'use strict';
 
 const DataStore = require('../db/sqlite');
+let LA = require('../common/Logging')
+let Logger = new LA('moderation');
 
 function getUserFromMention(mention) {
 	if (!mention) return;
@@ -91,13 +93,14 @@ module.exports.commands['warn'] = {
 
             
             warnedUser.send(WarnEmbed).then( () => {
-                // Do nothing.
+                Logger.log('Sent infraction warning to user ' + uid + ' in guild ' + message.guild.id + '.')
             }).catch( (err) => {
-                // Do nothing.
+                Logger.error('Failed to send infraction warning to user ' + uid + ' in guild ' + message.guild.id + '.')
             })
         }).catch( (err) => {
             message.channel.send(`**FAIL**: Something broke. Check logs.`);
-            console.log(err);
+            Logger.error('Failed to add infraction for user ' + uid + ' in guild ' + message.guild.id + '.')
+            Logger.error(err);
         })
     }
 }
@@ -273,7 +276,8 @@ module.exports.commands['search'] = {
             });
         }).catch( (err) => {
             message.channel.send('**FAIL**: An error occurred while processing your request. Report this to the bot owner.');
-            console.log(err);
+            Logger.error('Failure during user punishment search: user ' + uid + ', guild ID ' + message.guild.id + ".")
+            Logger.error(err);
         })
     }
 }
@@ -332,7 +336,8 @@ module.exports.commands['punishinfo'] = {
 
                     message.channel.send(InfoEmbed)
                 }).catch( (err) => {
-                    console.log(err)
+                    Logger.error('Failed to get user information for either ' + punishInfo[0].userID + ' or ' + punishInfo[0].moderatorID + ', guild ID ' + message.guild.id + '.')
+                    Logger.error(err)
                     let InfoEmbed = new Discord.MessageEmbed()
                     .setColor('#00ff00')
                     .setTitle('Information about Infraction ID ' + args[0])
@@ -352,7 +357,8 @@ module.exports.commands['punishinfo'] = {
             
 
         }).catch( (err) => {
-            console.log(err)
+            Logger.error('Failed to get punishment information, guild ID ' + message.guild.id + ', infraction ID ' + args[0] + '.')
+            Logger.error(err)
             message.channel.send('**FAIL**: An error occurred while processing your request. Report this to the bot owner.');
         });
         
@@ -424,6 +430,7 @@ module.exports.commands['kick'] = {
 
             client.users.cache.get(uid).send(KickEmbed).then( () => {
                 // Try kicking user.
+                Logger.log('Sent infraction warning to user ' + uid + ' in guild ' + message.guild.id + '.')
                 message.guild.members.cache.get(uid).kick(reasonMsg).then( () => {
                     message.channel.send('**SUCCESS**: User kicked successfully.');
                 }).catch( () => {
@@ -431,6 +438,7 @@ module.exports.commands['kick'] = {
                 })
             }).catch( (err) => {
                 message.channel.send('*User does not have DMs open for this server or has blocked the bot - they will not receive any notification.*');
+                Logger.error('Failed to send infraction warning to user ' + uid + ' in guild ' + message.guild.id + '.')
                 message.guild.members.cache.get(uid).kick(reasonMsg).then( () => {
                     message.channel.send('**SUCCESS**: User kicked successfully.');
                 }).catch( () => {
@@ -439,7 +447,8 @@ module.exports.commands['kick'] = {
             })
         }).catch( (err) => {
             message.channel.send(`**FAIL**: Something broke. Check logs.`);
-            console.log(err);
+            Logger.error('Failed to add infraction for user ' + uid + ' in guild ' + message.guild.id + '.')
+            Logger.error(err);
         })
         
     }
@@ -510,6 +519,7 @@ module.exports.commands['ban'] = {
 
             client.users.cache.get(uid).send(BanEmbed).then( () => {
                 // Try kicking user.
+                Logger.log('Sent infraction warning to user ' + uid + ' in guild ' + message.guild.id + '.')
                 message.guild.members.cache.get(uid).ban().then( () => {
                     message.channel.send('**SUCCESS**: User banned successfully.');
                 }).catch( (err) => {
@@ -517,6 +527,7 @@ module.exports.commands['ban'] = {
                     console.log(err);
                 })
             }).catch( (err) => {
+                Logger.error('Failed to send infraction warning to user ' + uid + ' in guild ' + message.guild.id + '.')
                 message.channel.send('*User does not have DMs open for this server or has blocked the bot - they will not receive any notification.*');
                 message.guild.members.cache.get(uid).ban().then( () => {
                     message.channel.send('**SUCCESS**: User banned successfully.');
@@ -526,7 +537,8 @@ module.exports.commands['ban'] = {
             })
         }).catch( (err) => {
             message.channel.send(`**FAIL**: Something broke. Check logs.`);
-            console.log(err);
+            Logger.error('Failed to add infraction for user ' + uid + ' in guild ' + message.guild.id + '.')
+            Logger.error(err);
         })
         
     }

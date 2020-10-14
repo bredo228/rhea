@@ -22,6 +22,9 @@ function handler(req,res) {
     res.end('Not an HTTP server.<br />Rhea Discord Bot Management Websocket');
 }
 
+let LA = require('./common/Logging')
+let Logger = new LA('processor');
+
 if (client.CONFIG.enableWebsocket) {
     var app = require('http').createServer(handler)
     var io = require('socket.io')(app);
@@ -34,12 +37,12 @@ if (client.CONFIG.enableWebsocket) {
 
 if (process.env.RHEA_TOKEN === undefined) {
     // No token.
-    console.warn(`[FATAL]: You need to specify the Environment Variable "RHEA_TOKEN" in order to start this bot.`);
+    Logger.error(`You need to specify the Environment Variable "RHEA_TOKEN" in order to start this bot.`);
     
     if (client.CONFIG.enableWebsocket) {
-        console.warn(`[INFO]: Awaiting Management Interface connection...`)
+        Logger.log(`Awaiting Management Interface connection...`)
     } else {
-        console.warn(`[FATAL]: Exiting...`)
+        Logger.error(`[FATAL]: Exiting...`)
         process.exit(1);
     }
 
@@ -61,7 +64,7 @@ for (const Files of CommandsDir) {
 
 // Initialise bot.
 client.on('ready', () => {
-    console.log(`[DEBUG]: Rhea started, in ${client.guilds.size}.`);
+    Logger.log(`Rhea started, in ${client.guilds.cache.size} guild(s).`);
 })
 
 client.on('message', (message) => {
@@ -88,7 +91,8 @@ client.on('message', (message) => {
         if (MessageDeleted) {
 
             // Add infraction.
-            
+            Logger.log('Word blacklist triggered over MESSAGE event, user ' + message.author.id + ' on guild ' + message.guild.id + ".")
+
             Store.addInfraction(message.author.id, client.user.id, 'warn', '[AUTOMOD] Word blacklist.').then( (infractionID) => {
                 let WarnEmbed = new Discord.MessageEmbed()
                 .setColor('#ff0000')
@@ -113,9 +117,9 @@ client.on('message', (message) => {
                 });
     
                 client.users.cache.get(message.author.id).send(WarnEmbed).then( () => {
-                    // Do nothing.
+                    Logger.log('Infraction alert sent to user ' + message.author.id + ' successfully.')
                 }).catch( (err) => {
-                    // Do nothing.
+                    Logger.error('Failed to send infraction alert to user ' + message.author.id + '.')
                 })
     
             })
@@ -123,7 +127,7 @@ client.on('message', (message) => {
 
         if (!message.content.startsWith(client.CONFIG.prefix)) return;
 
-        console.log(`[DEBUG]: Received message.`);
+        Logger.log(`[DEBUG]: Received message.`);
         
         let args = message.content.slice(client.CONFIG.prefix.length).trim().split(/ +/g);
         let command = args.shift().toLowerCase();
@@ -132,6 +136,7 @@ client.on('message', (message) => {
             client.Commands.forEach( (element) => {
                 if (element.commands[command] !== undefined) {
                     // Command exists.
+                    Logger.log('Command executed: ' + command)
                     return element.commands[command].exec_function(message, args, Discord, client);
                 }
             })
@@ -150,6 +155,7 @@ client.on('message', (message) => {
         client.Commands.forEach( (element) => {
             if (element.commands[command] !== undefined) {
                 // Command exists.
+                Logger.log('Command executed: ' + command)
                 return element.commands[command].exec_function(message, args, Discord, client);
             }
         })
@@ -160,6 +166,7 @@ client.on('guildMemberUpdate', (olduser, newuser) => {
     if (newuser.guild === null) return;
     let Store = new DataStore(newuser.guild.id)
 
+    Logger.log('Guild member object updated on guild ID ' + newuser.guild.id + '.')
     Store.getObject('word-blacklist').then ( (blacklistwords) => {
         let blacklisted = blacklistwords[0].value.split(',');
         var MessageDeleted = false;
@@ -174,6 +181,7 @@ client.on('guildMemberUpdate', (olduser, newuser) => {
 
         if (MessageDeleted) {
 
+            Logger.log('Word blacklist triggered over GUILD_MEMBER_UPDATE event, user ' + newuser.id + ' on guild ' + newuser.guild.id + ".")
             // Add infraction.
             //var msg = oldmsg;
             Store.addInfraction(newuser.id, client.user.id, 'warn', '[AUTOMOD] Nickname word blacklist.').then( (infractionID) => {
@@ -203,10 +211,9 @@ client.on('guildMemberUpdate', (olduser, newuser) => {
                 });
 
                 client.users.cache.get(newuser.id).send(WarnEmbed).then( () => {
-                    // Do nothing.
+                    Logger.log('Infraction alert sent to user ' + newuser.id + ' successfully.')
                 }).catch( (err) => {
-                    // Do nothing.
-                    console.log(err)
+                    Logger.error('Failed to send infraction alert to user ' + newuser.id + '.')
                 })
     
             })
@@ -214,7 +221,8 @@ client.on('guildMemberUpdate', (olduser, newuser) => {
 
         }
     }).catch ( (err) => {
-        console.log(err)
+        Logger.error('Failed to run blacklist check on GUILD_MEMBER_UPDATE event.')
+        Logger.error(err)
     });
 })
 
@@ -222,6 +230,7 @@ client.on('messageUpdate', (oldmsg, newmsg) => {
     if (newmsg.guild === null) return;
     let Store = new DataStore(newmsg.guild.id)
 
+    Logger.log('Message update event on guild ' + oldmsg.guild.id + '.')
 
     Store.getObject('message-log').then( (v) => {
         // v[0].value is the ID.
@@ -238,7 +247,7 @@ client.on('messageUpdate', (oldmsg, newmsg) => {
         
         client.guilds.cache.get(oldmsg.guild.id).channels.cache.get(channelID).send(JoinEmbed);
     }).catch( (err) => {
-        console.log(err);
+        //console.log(err);
     })
 
     Store.getObject('word-blacklist').then ( (blacklistwords) => {
@@ -254,7 +263,7 @@ client.on('messageUpdate', (oldmsg, newmsg) => {
         })
 
         if (MessageDeleted) {
-
+            Logger.log('Word blacklist triggered over MESSAGE_UPDATE event, user ' + newmsg.author.id + ' on guild ' + newmsg.guild.id + ".")
             // Add infraction.
             var msg = oldmsg;
             Store.addInfraction(msg.author.id, client.user.id, 'warn', '[AUTOMOD] Word blacklist.').then( (infractionID) => {
@@ -284,9 +293,9 @@ client.on('messageUpdate', (oldmsg, newmsg) => {
                 });
 
                 client.users.cache.get(msg.author.id).send(WarnEmbed).then( () => {
-                    // Do nothing.
+                    Logger.log('Infraction alert sent to user ' + msg.author.id + ' successfully.')
                 }).catch( (err) => {
-                    // Do nothing.
+                    Logger.error('Failed to send infraction alert to user ' + msg.author.id + '.')
                 })
     
             })
@@ -324,7 +333,8 @@ client.on('guildMemberAdd', (member) => {
 
         client.guilds.cache.get(member.guild.id).channels.cache.get(channelID).send(JoinEmbed);
     }).catch( (err) => {
-        console.log(err);
+        Logger.error('Error encountered while trying to add to join log for guild ' + member.guild.id)
+        Logger.error(err);
     })
 
 })
@@ -359,7 +369,8 @@ client.on('guildMemberRemove', (member) => {
 
         client.guilds.cache.get(member.guild.id).channels.cache.get(channelID).send(LeaveEmbed).catch(O_o=>{});
     }).catch( (err) => {
-        console.log(err);
+        Logger.error('Error encountered while trying to add to join log for guild ' + member.guild.id)
+        Logger.error(err);
     })
 
 })
@@ -386,7 +397,8 @@ client.on('messageDelete', (msg) => {
 
         client.guilds.cache.get(msg.guild.id).channels.cache.get(channelID).send(JoinEmbed);
     }).catch( (err) => {
-        console.log(err);
+        Logger.error('Error encountered while trying to add to message log for guild ' + msg.guild.id)
+        Logger.error(err);
     })
 })
 

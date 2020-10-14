@@ -1,0 +1,1 @@
+[moderation] [LOG] Logging initialised for module moderation.
