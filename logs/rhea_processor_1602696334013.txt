@@ -1,1 +1,0 @@
-[processor] [LOG] Rhea started, in 2 guild(s).

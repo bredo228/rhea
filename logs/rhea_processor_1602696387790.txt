@@ -1,1 +1,0 @@
-[processor] [LOG] Logging initialised for module processor.

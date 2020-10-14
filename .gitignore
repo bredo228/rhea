@@ -5,3 +5,4 @@ bot_config.json
 giveaways.json
 config.json
 datastore/*
+logs/*

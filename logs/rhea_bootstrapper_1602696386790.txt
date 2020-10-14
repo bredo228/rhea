@@ -1,1 +1,0 @@
-[bootstrapper] [LOG] Logging initialised for module bootstrapper.
