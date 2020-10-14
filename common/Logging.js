@@ -9,7 +9,7 @@ const path = require('path')
 module.exports = function(moduleName) {
 
     // Initialise filename, change this to support Linux.
-    const location = path.join(__dirname, "\\..\\logs\\")
+    const location = path.join(__dirname, "../logs/")
     const fileName = "rhea_" + moduleName + "_" + Date.now() + ".txt";
 
     this.warn = function(text) {
