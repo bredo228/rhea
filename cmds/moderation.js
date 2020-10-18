@@ -506,7 +506,7 @@ module.exports.commands['ban'] = {
             Store.getObject('infraction-log').then( (v) => {
                 let InfractionEmbed = new Discord.MessageEmbed()
                     .setColor('#ff0000')
-                    .setTitle(warnedUser.tag + " kicked")
+                    .setTitle(warnedUser.tag + " banned")
                     .setAuthor(client.CONFIG.botName, client.CONFIG.botPicture)
                     .addField('Punished', warnedUser.tag + " (" + warnedUser.id + ")" , true)
                     .addField('Punisher', message.author.tag + " (" + message.author.id + ")", true)
