@@ -14,6 +14,9 @@ try {
     // Configuration data.
     client.CONFIG = require('./config.json')
     const fs = require('fs');
+
+    const AS = require('./common/Antispam');
+    const Antispam = new AS(client, Discord);
     
     // Initialise Logging/Socketing
     
@@ -70,6 +73,7 @@ try {
     client.on('message', (message) => {
         if (message.author.bot) return;
     
+
         // Check the word blacklist.
     
         if (message.guild === null) return; // Potential API issue?
@@ -77,6 +81,7 @@ try {
         let Store = new DataStore(message.guild.id)
     
         Store.getObject('word-blacklist').then ( (blacklistwords) => {
+            
             let blacklisted = blacklistwords[0].value.split(',');
             var MessageDeleted = false;
     
@@ -124,6 +129,11 @@ try {
         
                 })
             }
+
+            // Run the message past the antispammer before doing anything else.
+            let check = Antispam.scanner(message);
+
+            if (check) return false; // Don't process this message if the user has been muted.
     
             if (!message.content.startsWith(client.CONFIG.prefix)) return;
     
@@ -143,7 +153,13 @@ try {
             }
              
         }).catch ( (err) => {
-            console.log(err)
+            Logger.log(err);
+            
+            // Run the message past the antispammer before doing anything else.
+            let check = Antispam.scanner(message);
+
+            if (check) return false; // Don't process this message if the user has been muted.
+
             if (!message.content.startsWith(client.CONFIG.prefix)) return;
     
             console.log(`[DEBUG]: Received message.`);

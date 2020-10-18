@@ -86,3 +86,19 @@ module.exports.commands['archivechannel'] = {
         })
     }
 }
+
+module.exports.commands['muterole'] = {
+    'pretty_name': 'muterole <role-id>',
+    'description': 'Change the mute role for this guild.',
+    'exec_function': function(message, args, Discord, client) {
+        if (!message.member.hasPermission('ADMINISTRATOR')) return message.channel.send('**FAIL**: Insufficient permissions.');
+        args[0] = args[0] || "0";
+
+        // User is an admin.
+        let Store = new DataStore(message.guild.id);
+
+        Store.updateObject('mute-role', args[0]).then( () => {
+            message.channel.send('**SUCCESS**: Mute role updated successfully!');
+        })
+    }
+}

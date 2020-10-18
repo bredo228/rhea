@@ -25,7 +25,6 @@ module.exports = {
     'commands': {}
 }
 
-
 module.exports.commands['warn'] = {
     'pretty_name': 'warn <user-id> <reason>',
     'description': 'Warn a user.',
