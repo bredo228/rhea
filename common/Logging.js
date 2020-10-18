@@ -15,7 +15,7 @@ module.exports = function(moduleName) {
     this.warn = function(text) {
         console.log(`[${moduleName}] [WARN] ${text}`)
 
-        fs.writeFile(location + fileName, '[' + moduleName +'] [WARN] ' + text, function (err) {
+        fs.appendFile(location + fileName, '[' + moduleName +'] [WARN] ' + text, function (err) {
             if (err) return console.log(err);
         });
     }
@@ -23,14 +23,14 @@ module.exports = function(moduleName) {
     this.log = function(text) {
         console.log(`[${moduleName}] [LOG] ${text}`)
 
-        fs.writeFile(location + fileName, '[' + moduleName +'] [LOG] ' + text, function (err) {
+        fs.appendFile(location + fileName, '[' + moduleName +'] [LOG] ' + text, function (err) {
             if (err) return console.log(err);
         });
     } 
 
     this.error = function(text) {
         console.log(`[${moduleName}] [ERROR] ${text}`)
-        fs.writeFile(location + fileName, '[' + moduleName +'] [ERROR] ' + text, function (err) {
+        fs.appendFile(location + fileName, '[' + moduleName +'] [ERROR] ' + text, function (err) {
             if (err) return console.log(err);
         });
     }
