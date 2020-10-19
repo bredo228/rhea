@@ -569,7 +569,7 @@ try {
                     
                     let Store = new DataStore(data.args[0]);
 
-                    Store.updateObject('regex-blacklist', {"blacklist":[]}).then( () => {
+                    Store.updateObject('regex-blacklist', JSON.stringify({"blacklist":[]})).then( () => {
                         socket.emit('command_output', "Wiped regexp blacklist of guild" + data.args[0] + '.'); 
                         return socket.emit('command_done');
                     }).catch( () => {
