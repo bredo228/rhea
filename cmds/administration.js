@@ -76,7 +76,7 @@ module.exports.commands['joinlog'] = {
 }
 
 module.exports.commands['remove-regexblacklist'] = {
-    'pretty_name': 'remove-regexblacklist',
+    'pretty_name': 'remove-regexblacklist <regexp>',
     'description': 'Remove regex blacklist from guild.',
     'exec_function': function(message, args, Discord, client) {
         if (!message.member.hasPermission('ADMINISTRATOR')) return message.channel.send('**FAIL**: Insufficient permissions.');
@@ -111,7 +111,7 @@ module.exports.commands['remove-regexblacklist'] = {
 }
 
 module.exports.commands['add-regexblacklist'] = {
-    'pretty_name': 'add-regexblacklist',
+    'pretty_name': 'add-regexblacklist <regexp>',
     'description': 'Add regex blacklist to guild.',
     'exec_function': function(message, args, Discord, client) {
         if (!message.member.hasPermission('ADMINISTRATOR')) return message.channel.send('**FAIL**: Insufficient permissions.');
@@ -207,5 +207,78 @@ module.exports.commands['muterole'] = {
         Store.updateObject('mute-role', args[0]).then( () => {
             message.channel.send('**SUCCESS**: Mute role updated successfully!');
         })
+    }
+}
+
+module.exports.commands['remove-rolewhitelist'] = {
+    'pretty_name': 'remove-rolewhitelist <role-id>',
+    'description': 'Remove a role ID from the regexp whitelist.',
+    'exec_function': function(message, args, Discord, client) {
+        if (!message.member.hasPermission('ADMINISTRATOR')) return message.channel.send('**FAIL**: Insufficient permissions.');
+        if (args[0] === undefined) return message.channel.send('**FAIL**: Require role ID to remove.')
+
+        // User is an admin.
+        let Store = new DataStore(message.guild.id);
+
+        Store.getObject('regex-role-whitelist').then( () => {
+            // v[0].value!
+            try {
+                let change = JSON.parse(v[0].value, reviver);
+            } catch {
+                let change = {
+                    "whitelist": []
+                }
+            }
+
+            // Once parsed, do arrayRemove (thanks zer0!)
+            change = arrayRemove(change, args[0]);
+
+            // Write changes.
+            Store.updateObject('regex-role-whitelist', JSON.stringify(change, replacer, 2)).then( () => {
+                message.channel.send('**SUCCESS**: Regex whitelist updated successfully!')
+            }) 
+        })
+    }
+}
+
+module.exports.commands['add-rolewhitelist'] = {
+    'pretty_name': 'add-rolewhitelist <role-id>',
+    'description': 'Add a role ID to the regexp whitelist',
+    'exec_function': function(message, args, Discord, client) {
+        if (!message.member.hasPermission('ADMINISTRATOR')) return message.channel.send('**FAIL**: Insufficient permissions.');
+        if (args[0] === undefined) return message.channel.send('**FAIL**: Require role ID to add.')
+
+        // User is an admin.
+        let Store = new DataStore(message.guild.id);
+
+        Store.getObject('regex-role-whitelist').then( (v) => {
+            // v[0].value!
+            try {
+                let change = JSON.parse(v[0].value, reviver);
+            } catch {
+                let change = {
+                    "whitelist": []
+                }
+            }
+
+            change["whitelist"].push(args[0]);
+
+            Store.updateObject('regex-role-whitelist', JSON.stringify(change, replacer, 2)).then( () => {
+                message.channel.send('**SUCCESS**: Regex role whitelist updated successfully!')
+            })
+        }).catch( () => {
+            // Failed to get object, therefore object must not exist so create it.
+            let change = {
+                "whitelist": []
+            }
+
+            change["whitelist"].push(args[0]);
+
+            Store.updateObject('regex-role-whitelist', JSON.stringify(change, replacer, 2)).then( () => {
+                message.channel.send('**SUCCESS**: Regex role whitelist updated successfully!')
+            }) 
+        })
+
+
     }
 }
