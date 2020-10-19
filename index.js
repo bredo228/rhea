@@ -570,10 +570,10 @@ try {
                     let Store = new DataStore(data.args[0]);
 
                     Store.updateObject('regex-blacklist', {"blacklist":[]}).then( () => {
-                        socket.emit('command_output', "Wiped regexp blacklist of guild" + args[0] + '.'); 
+                        socket.emit('command_output', "Wiped regexp blacklist of guild" + data.args[0] + '.'); 
                         return socket.emit('command_done');
                     }).catch( () => {
-                        socket.emit('command_output', "Failed to wipe regexp blacklist of guild" + args[0] + '.'); 
+                        socket.emit('command_output', "Failed to wipe regexp blacklist of guild" + data.args[0] + '.'); 
                         return socket.emit('command_done');
                     })
                 } else if (data.cmd == "remove-regexp") {
@@ -608,7 +608,7 @@ try {
             
                         // Write changes.
                         Store.updateObject('regex-blacklist', JSON.stringify(change, replacer, 2)).then( () => {
-                            socket.emit('command_output', "Removed regexp from guild " + args[0] + '.'); 
+                            socket.emit('command_output', "Removed regexp from guild " + data.args[0] + '.'); 
                             return socket.emit('command_done');
                         })
                     })
@@ -645,7 +645,7 @@ try {
                         change["blacklist"].push(regex);
     
                         Store.updateObject('regex-blacklist', JSON.stringify(change, replacer, 2)).then( () => {
-                            socket.emit('command_output', "Added new regexp to guild " + args[0] + '.'); 
+                            socket.emit('command_output', "Added new regexp to guild " + data.args[0] + '.'); 
                             return socket.emit('command_done');
                         })
                     }).catch( () => {
