@@ -220,21 +220,26 @@ module.exports.commands['remove-rolewhitelist'] = {
         // User is an admin.
         let Store = new DataStore(message.guild.id);
 
-        Store.getObject('regex-role-whitelist').then( () => {
+        Store.getObject('regex-role-whitelist').then( (v) => {
             // v[0].value!
             try {
                 let change = JSON.parse(v[0].value, reviver);
                 // Once parsed, do arrayRemove (thanks zer0!)
-                change = arrayRemove(change, args[0]);
-                
+                change["whitelist"] = arrayRemove(change["whitelist"], args[0]);
+
+                console.log('ok')
+                console.log(change)
                 // Write changes.
                 Store.updateObject('regex-role-whitelist', JSON.stringify(change, replacer, 2)).then( () => {
                     message.channel.send('**SUCCESS**: Regex whitelist updated successfully!')
                 }) 
-            } catch {
+            } catch (err) {
+                console.log(err)
                 let change = {
                     "whitelist": []
                 }
+
+                console.log(change)
 
                 // Write changes.
                 Store.updateObject('regex-role-whitelist', JSON.stringify(change, replacer, 2)).then( () => {
@@ -245,6 +250,8 @@ module.exports.commands['remove-rolewhitelist'] = {
 
 
 
+        }).catch( () => {
+            console.log("it pooped")
         })
     }
 }
