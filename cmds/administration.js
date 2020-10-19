@@ -224,14 +224,15 @@ module.exports.commands['remove-rolewhitelist'] = {
             // v[0].value!
             try {
                 let change = JSON.parse(v[0].value, reviver);
+                // Once parsed, do arrayRemove (thanks zer0!)
+                change = arrayRemove(change, args[0]);
             } catch {
                 let change = {
                     "whitelist": []
                 }
             }
 
-            // Once parsed, do arrayRemove (thanks zer0!)
-            change = arrayRemove(change, args[0]);
+
 
             // Write changes.
             Store.updateObject('regex-role-whitelist', JSON.stringify(change, replacer, 2)).then( () => {
