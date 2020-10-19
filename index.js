@@ -33,7 +33,22 @@ try {
         var io = require('socket.io')(app);
     }
     
-    
+    // Stuff for JSON serialisation/de-serialisation.
+    function replacer(key, value) {
+        if (value instanceof RegExp)
+          return ("__REGEXP " + value.toString());
+        else
+          return value;
+      }
+      
+      function reviver(key, value) {
+        if (value.toString().indexOf("__REGEXP ") == 0) {
+          var m = value.split("__REGEXP ")[1].match(/\/(.*)\/(.*)?/);
+          return new RegExp(m[1], m[2] || "");
+        } else
+          return value;
+      }
+
     
     
     // Check if we've got a token.
@@ -79,6 +94,67 @@ try {
         if (message.guild === null) return; // Potential API issue?
     
         let Store = new DataStore(message.guild.id)
+
+        Store.getObject('regex-blacklist').then( (v) => {
+            // v[0].value!
+
+            // Parse JSON string.
+            let rgBlacklist = JSON.parse(v[0].value, reviver)
+            let deleted = false;
+            
+            for (const i in rgBlacklist["blacklist"]) {
+                // Iterate through blacklist
+                let regex = rgBlacklist["blacklist"][i]
+
+                // Now that we have our regex we can check it against our string.
+                let searching = message.content.search(regex);
+                //console.log(searching)
+                if (searching > -1) {
+                    // Regex blacklist tripped.
+                    //console.log('REGEX BLACKLIST TRIPPED')
+
+                    message.delete();
+                    deleted = true;
+                    
+                }
+            }
+
+            if (deleted) {
+                // Add infraction, warn user etc.
+                Logger.log('Regexp blacklist triggered over MESSAGE event, user ' + message.author.id + ' on guild ' + message.guild.id + ".")
+    
+                Store.addInfraction(message.author.id, client.user.id, 'warn', '[AUTOMOD] Regex blacklist.').then( (infractionID) => {
+                    let WarnEmbed = new Discord.MessageEmbed()
+                    .setColor('#ff0000')
+                    .setTitle('New Infraction')
+                    .setAuthor(client.CONFIG.botName, client.CONFIG.botPicture)
+                    .setDescription('You have received an infraction in ' + message.guild.name + '.')
+                    .addField('Type', 'warn', true)
+                    .addField('Infraction ID', infractionID, true)
+                    .addField('Reason', '[AUTOMOD] Regex blacklist.' , true);
+    
+                    Store.getObject('infraction-log').then( (v) => {
+                        let InfractionEmbed = new Discord.MessageEmbed()
+                            .setColor('#ff0000')
+                            .setTitle('New warning for ' + message.author.tag)
+                            .setAuthor(client.CONFIG.botName, client.CONFIG.botPicture)
+                            .addField('Punished', message.author.tag + " (" + message.author.id + ")" , true)
+                            .addField('Punisher', client.user.tag + " (" + client.user.id + ")", true)
+                            .addField('Reason', '[AUTOMOD] Regex blacklist.' , true);
+        
+                        client.guilds.cache.get(message.guild.id).channels.cache.get(v[0].value.toString()).send(InfractionEmbed);
+                        
+                    });
+        
+                    client.users.cache.get(message.author.id).send(WarnEmbed).then( () => {
+                        Logger.log('Infraction alert sent to user ' + message.author.id + ' successfully.')
+                    }).catch( (err) => {
+                        Logger.error('Failed to send infraction alert to user ' + message.author.id + '.')
+                    })
+        
+                })
+            }
+        })
     
         Store.getObject('word-blacklist').then ( (blacklistwords) => {
             
