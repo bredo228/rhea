@@ -679,14 +679,14 @@ try {
                             "blacklist": []
                         }
     
-                        var flags = args[0].replace(/.*\/([gimy]*)$/, '$1');
-                        var pattern = args[0].replace(new RegExp('^/(.*?)/'+flags+'$'), '$1');
+                        var flags = data.args[1].replace(/.*\/([gimy]*)$/, '$1');
+                        var pattern = data.args[1].replace(new RegExp('^/(.*?)/'+flags+'$'), '$1');
                         var regex = new RegExp(pattern, flags);
     
                         change["blacklist"].push(regex);
     
                         Store.updateObject('regex-blacklist', JSON.stringify(change, replacer, 2)).then( () => {
-                            socket.emit('command_output', "Added new regexp to guild " + args[0] + '.'); 
+                            socket.emit('command_output', "Added new regexp to guild " + data.args[0] + '.'); 
                             return socket.emit('command_done');
                         });
                     });
