@@ -567,7 +567,7 @@ try {
                         return socket.emit('command_done');
                     }
                     
-                    let Store = new DataStore(args[0]);
+                    let Store = new DataStore(data.args[0]);
 
                     Store.updateObject('regex-blacklist', {"blacklist":[]}).then( () => {
                         socket.emit('command_output', "Wiped regexp blacklist of guild" + args[0] + '.'); 
@@ -597,8 +597,8 @@ try {
                             }
                         }
             
-                        var flags = args[1].replace(/.*\/([gimy]*)$/, '$1');
-                        var pattern = args[1].replace(new RegExp('^/(.*?)/'+flags+'$'), '$1');
+                        var flags = data.args[1].replace(/.*\/([gimy]*)$/, '$1');
+                        var pattern = data.args[1].replace(new RegExp('^/(.*?)/'+flags+'$'), '$1');
                         var regex = new RegExp(pattern, flags);
             
                         // Once parsed, do arrayRemove (thanks zer0!)
@@ -625,7 +625,7 @@ try {
                     }
 
                     // User is an admin.
-                    let Store = new DataStore(args[0]);
+                    let Store = new DataStore(data.args[0]);
 
                     Store.getObject('regex-blacklist').then( (v) => {
                         // v[0].value!
@@ -638,8 +638,8 @@ try {
                         }
                 
     
-                        var flags = args[0].replace(/.*\/([gimy]*)$/, '$1');
-                        var pattern = args[0].replace(new RegExp('^/(.*?)/'+flags+'$'), '$1');
+                        var flags = data.args[0].replace(/.*\/([gimy]*)$/, '$1');
+                        var pattern = data.args[0].replace(new RegExp('^/(.*?)/'+flags+'$'), '$1');
                         var regex = new RegExp(pattern, flags);
     
                         change["blacklist"].push(regex);
