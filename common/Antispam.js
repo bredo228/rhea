@@ -53,36 +53,9 @@ var writeHolding = function () {
 }
 
 function millisecondsToStr (milliseconds) {
-    // TIP: to find current time in milliseconds, use:
-    // var  current_time_milliseconds = new Date().getTime();
-
-    function numberEnding (number) {
-        return (number > 1) ? 's' : '';
-    }
-
-    var temp = Math.floor(milliseconds / 1000);
-    var years = Math.floor(temp / 31536000);
-    if (years) {
-        return years + ' year' + numberEnding(years);
-    }
-    //TODO: Months! Maybe weeks? 
-    var days = Math.floor((temp %= 31536000) / 86400);
-    if (days) {
-        return days + ' day' + numberEnding(days);
-    }
-    var hours = Math.floor((temp %= 86400) / 3600);
-    if (hours) {
-        return hours + ' hour' + numberEnding(hours);
-    }
-    var minutes = Math.floor((temp %= 3600) / 60);
-    if (minutes) {
-        return minutes + ' minute' + numberEnding(minutes);
-    }
-    var seconds = temp % 60;
-    if (seconds) {
-        return seconds + ' second' + numberEnding(seconds);
-    }
-    return 'less than a second'; //'just now' //or other string you like;
+    let moment = require('moment');
+    //milliseconds = Date.now() + milliseconds;
+    return moment.utc(moment.duration(milliseconds).as('milliseconds')).format('HH:mm:ss') + " (HH:MM:SS)"
 }
 
 
@@ -115,7 +88,7 @@ module.exports = function(client, Discord) {
         //console.log(b);
         if ( b ) {
             // User requires ratelimiting.
-            this.muteUser(message.guild.id, message.author.id, CONFIG.mute_defaultID, 20000, "[AUTOMOD] Antispam");
+            this.muteUser(message.guild.id, message.author.id, client.user.id, 20000, "[AUTOMOD] Antispam");
             return true;
         } else {
             return false;
@@ -156,6 +129,7 @@ module.exports = function(client, Discord) {
     
         time = time || 3600000; // Specified time, or 1 hour.
         reason = reason || "No reason specified."; // Specified reason, or "No reason specified".
+        modId = modId || client.user.id;
     
         // Do mute.
     
@@ -179,7 +153,8 @@ module.exports = function(client, Discord) {
             try {
                 let guild = client.guilds.cache.get(guildId);
                 let member = guild.members.cache.get(userId);
-    
+                let mod = guild.members.cache.get(modId);
+
                 let role = guild.roles.cache.get(v[0].value);
 
                 member.roles.add(role).catch(console.error);
@@ -196,6 +171,7 @@ module.exports = function(client, Discord) {
         Store.addInfraction(userId, client.user.id, 'mute', reason).then( (infractionID) => {
             let guild = client.guilds.cache.get(guildId);
             let member = guild.members.cache.get(userId);
+            let mod = guild.members.cache.get(modId);
 
             let WarnEmbed = new Discord.MessageEmbed()
             .setColor('#ff0000')
@@ -213,7 +189,7 @@ module.exports = function(client, Discord) {
                     .setTitle('New mute for ' + member.user.tag)
                     .setAuthor(client.CONFIG.botName, client.CONFIG.botPicture)
                     .addField('Punished', member.user.tag + " (" + member.user.id + ")" , true)
-                    .addField('Punisher', client.user.tag + " (" + client.user.id + ")", true)
+                    .addField('Punisher', mod.user.tag + " (" + mod.user.id + ")", true)
                     .addField('Reason', reason , true)
                     .addField('Length', millisecondsToStr(time));
 

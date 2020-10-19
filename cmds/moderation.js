@@ -4,6 +4,8 @@ const DataStore = require('../db/sqlite');
 let LA = require('../common/Logging')
 let Logger = new LA('moderation');
 
+const moment = require('moment');
+
 function getUserFromMention(mention) {
 	if (!mention) return;
 
@@ -278,6 +280,97 @@ module.exports.commands['search'] = {
             Logger.error('Failure during user punishment search: user ' + uid + ', guild ID ' + message.guild.id + ".")
             Logger.error(err);
         })
+    }
+}
+
+module.exports.commands['mute'] = {
+    'pretty_name': 'mute <user-id> <time> <reason>',
+    'description': 'Mute a user for a defined timeperiod.',
+    'exec_function': async function(message, args, Discord, client) {
+        // Check privileges etc. before muting.
+        if (args[0] === undefined) return message.channel.send('**ERROR: Need to specify user ID.**');
+        if (!message.member.hasPermission('KICK_MEMBERS')) return message.channel.send('**FAIL**: Insufficient permissions.')
+
+        var uid = args[0]
+
+        if (args[0].length != 18) {
+            //console.log("poo")
+            uid = getUserFromMention(args[0]);
+        }
+
+        var VerifyUserExists = client.users.cache.some(user => user.id === uid);
+
+        if (!VerifyUserExists) {
+            // User doesn't exist.
+            return message.channel.send('**FAIL**: User is not a member of this guild.')
+        }
+
+        var user = message.guild.member(uid);
+
+        //console.log(message.member)
+        if (message.author.id != message.guild.owner.id) {
+            if (message.member.roles.highest.comparePositionTo(user.roles.highest) <= 0) {
+                // Oop.
+                return message.channel.send('**FAIL**: Cannot kick as user has higher role than you.')
+            }
+        } 
+
+        let reasonMsg = args.slice(2,args.length).join(" ");
+
+        reasonMsg = reasonMsg === "" ? "No reason specified" : reasonMsg;
+
+        // now lets do crazy shit to get the time
+        let time = args[1].split('/')
+
+        // if only one entry, then we're dealing with hours - if two, hours and minutes... if three, hours and minutes AND seconds!
+
+
+        
+        // We have hours and minutes, ignore seconds because bruh.
+        try {
+            var hours;
+            var minutes;
+            var seconds;
+
+            var genePool = 0;
+
+            //console.log(time);
+
+            for (const i in time) {
+                //console.log(i)
+                //console.log(time[i])
+                if (i == 0) {
+                    // hours
+                    //console.log('h')
+                    genePool = genePool + (time[i] * 3600000) ;
+                    //console.log(genePool)
+                } else if (i == 1) {
+                    // minutes
+                    //console.log('m')
+                    genePool = genePool + (time[i] * 60000);
+                    //console.log(genePool)
+                } else if (i == 2) {
+                    // sec onds
+                    //console.log('s')
+                    genePool = genePool + (time[i] * 1000);
+                    //console.log(genePool)
+                }
+            }
+
+            let totalLength = genePool;
+
+
+            //console.log("tl")
+            //
+            //console.log(genePool)
+            // Do actual mute
+            client.antispam.muteUser(message.guild.id, args[0], message.author.id, totalLength, reasonMsg);
+            message.channel.send('**SUCCESS:** Muted user ID ' + args[0] + '.')
+        } catch (exc) {
+            Logger.error(exc);
+            return message.channel.send('Failed to parse mute length - make sure you typed it properly.');
+        }
+
     }
 }
 

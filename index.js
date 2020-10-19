@@ -17,6 +17,8 @@ try {
 
     const AS = require('./common/Antispam');
     const Antispam = new AS(client, Discord);
+
+    client.antispam = Antispam; // Throw antispam onto a module-accessible scope.
     
     // Initialise Logging/Socketing
     
@@ -559,6 +561,110 @@ try {
                         socket.emit('command_error', "Failed to get property " + data.args[1] + " for guild ID " + data.args[0] + ".");
                         return socket.emit('command_done');
                     })
+                } else if (data.cmd == "wipeall-regexp") {
+                    if (!data.args[0] || data.args[0].length != 18) {
+                        socket.emit('command_output', "Usage: wipeall-regexp <guild-id>"); 
+                        return socket.emit('command_done');
+                    }
+                    
+                    let Store = new DataStore(args[0]);
+
+                    Store.updateObject('regex-blacklist', {"blacklist":[]}).then( () => {
+                        socket.emit('command_output', "Wiped regexp blacklist of guild" + args[0] + '.'); 
+                        return socket.emit('command_done');
+                    }).catch( () => {
+                        socket.emit('command_output', "Failed to wipe regexp blacklist of guild" + args[0] + '.'); 
+                        return socket.emit('command_done');
+                    })
+                } else if (data.cmd == "remove-regexp") {
+                    if (!data.args[0] || data.args[0].length != 18) {
+                        socket.emit('command_output', "Usage: add-regexp <guild-id> <regexp>"); 
+                        return socket.emit('command_done');
+                    }
+    
+                    if (!data.args[1]) {
+                        socket.emit('command_output', "Usage: add-regexp <guild-id> <regexp>"); 
+                        return socket.emit('command_done');
+                    }
+
+                    Store.getObject('regex-blacklist').then( () => {
+                        // v[0].value!
+                        try {
+                            let change = JSON.parse(v[0].value, reviver);
+                        } catch {
+                            let change = {
+                                "blacklist": []
+                            }
+                        }
+            
+                        var flags = args[1].replace(/.*\/([gimy]*)$/, '$1');
+                        var pattern = args[1].replace(new RegExp('^/(.*?)/'+flags+'$'), '$1');
+                        var regex = new RegExp(pattern, flags);
+            
+                        // Once parsed, do arrayRemove (thanks zer0!)
+                        change = change.filter(function (ele) {
+                            return ele != regex;
+                        });
+            
+                        // Write changes.
+                        Store.updateObject('regex-blacklist', JSON.stringify(change, replacer, 2)).then( () => {
+                            socket.emit('command_output', "Removed regexp from guild " + args[0] + '.'); 
+                            return socket.emit('command_done');
+                        })
+                    })
+
+                } else if (data.cmd == "add-regexp") {
+                    if (!data.args[0] || data.args[0].length != 18) {
+                        socket.emit('command_output', "Usage: add-regexp <guild-id> <regexp>"); 
+                        return socket.emit('command_done');
+                    }
+    
+                    if (!data.args[1]) {
+                        socket.emit('command_output', "Usage: add-regexp <guild-id> <regexp>"); 
+                        return socket.emit('command_done');
+                    }
+
+                    // User is an admin.
+                    let Store = new DataStore(args[0]);
+
+                    Store.getObject('regex-blacklist').then( (v) => {
+                        // v[0].value!
+                        try {
+                            let change = JSON.parse(v[0].value, reviver);
+                        } catch {
+                            let change = {
+                                "blacklist": []
+                            }
+                        }
+                
+    
+                        var flags = args[0].replace(/.*\/([gimy]*)$/, '$1');
+                        var pattern = args[0].replace(new RegExp('^/(.*?)/'+flags+'$'), '$1');
+                        var regex = new RegExp(pattern, flags);
+    
+                        change["blacklist"].push(regex);
+    
+                        Store.updateObject('regex-blacklist', JSON.stringify(change, replacer, 2)).then( () => {
+                            socket.emit('command_output', "Added new regexp to guild " + args[0] + '.'); 
+                            return socket.emit('command_done');
+                        })
+                    }).catch( () => {
+                        // Failed to get object, therefore object must not exist so create it.
+                        let change = {
+                            "blacklist": []
+                        }
+    
+                        var flags = args[0].replace(/.*\/([gimy]*)$/, '$1');
+                        var pattern = args[0].replace(new RegExp('^/(.*?)/'+flags+'$'), '$1');
+                        var regex = new RegExp(pattern, flags);
+    
+                        change["blacklist"].push(regex);
+    
+                        Store.updateObject('regex-blacklist', JSON.stringify(change, replacer, 2)).then( () => {
+                            socket.emit('command_output', "Added new regexp to guild " + args[0] + '.'); 
+                            return socket.emit('command_done');
+                        });
+                    });
                 } else if (data.cmd == "set-property") {
                     if (!data.args[0] || data.args[0].length != 18) {
                         socket.emit('command_output', "Usage: set-property <guild-id> <property-name> <value>"); 
@@ -589,7 +695,7 @@ try {
                     socket.disconnect();
                     process.exit(0);
                 } else if (data.cmd == "help") {
-                    socket.emit('command_output', "Rhea Help\n---------\n\nhelp - Get this message\nreconnect [token] - reconnect. if token specified, will reconnect using that token.\nping - ping the bot\nstop - stop the bot\ninfo - get connection info\nset-property <guild-id> <property> <value> - set the value of a property of a guild.\nget-property <guild-id> <property> - get the value of a property of a guild.\nexit - exit the Rhea CLI")
+                    socket.emit('command_output', "Rhea Help\n---------\n\nhelp - Get this message\nreconnect [token] - reconnect. if token specified, will reconnect using that token.\nping - ping the bot\nstop - stop the bot\ninfo - get connection info\nset-property <guild-id> <property> <value> - set the value of a property of a guild.\nadd-regexp <guild-id> <regexp> - add a regular expression to a guild's regexp blacklist, used for regexps > 2000 chars.\nremove-regexp <guild-id> <regexp> - remove a regexp from a guild's regexp blacklist, used for regexps > 2000 characters\nwipeall-regexp <guild-id> - will wipe all regexp blacklist entries from a guild, used if a guild's blacklist is causing errors.\nget-property <guild-id> <property> - get the value of a property of a guild.\nexit - exit the Rhea CLI")
                     socket.emit('command_done')
                 } else if (data.cmd == "info") {
                     if (client.user === null) {

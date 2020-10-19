@@ -100,7 +100,7 @@ module.exports.commands['remove-regexblacklist'] = {
             var regex = new RegExp(pattern, flags);
 
             // Once parsed, do arrayRemove (thanks zer0!)
-            arrayRemove(change, regex);
+            change = arrayRemove(change, regex);
 
             // Write changes.
             Store.updateObject('regex-blacklist', JSON.stringify(change, replacer, 2)).then( () => {
