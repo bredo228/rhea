@@ -351,6 +351,92 @@ try {
     
         Logger.log('Message update event on guild ' + oldmsg.guild.id + '.')
     
+        Store.getObject('regex-role-whitelist').then( (w) => {
+            // w[0].value!
+            let ok = false;
+            //console.log(w)
+            let wlarray = JSON.parse(w[0].value, reviver);
+
+            
+            //console.log(wlarray
+
+            wlarray["whitelist"].forEach( (roleid) => {
+                if (message.member.roles.cache.get(roleid)) {
+                    // Got it!
+                    ok = true;
+                }
+            });
+
+            // Check if user is whitelisted.
+            if (!ok) {
+                // Scathe user.
+                Store.getObject('regex-blacklist').then( (v) => {
+                    // v[0].value!
+        
+                    // Parse JSON string.
+                    let rgBlacklist = JSON.parse(v[0].value, reviver)
+                    let deleted = false;
+                    
+                    for (const i in rgBlacklist["blacklist"]) {
+                        // Iterate through blacklist
+                        let regex = rgBlacklist["blacklist"][i]
+        
+                        // Now that we have our regex we can check it against our string.
+                        let searching = message.content.search(regex);
+                        //console.log(searching)
+                        if (searching > -1) {
+                            // Regex blacklist tripped.
+                            //console.log('REGEX BLACKLIST TRIPPED')
+        
+                            message.delete();
+                            deleted = true;
+                            
+                        }
+                    }
+        
+                    if (deleted) {
+                        // Add infraction, warn user etc.
+                        Logger.log('Regexp blacklist triggered over MESSAGE event, user ' + message.author.id + ' on guild ' + message.guild.id + ".")
+            
+                        Store.addInfraction(message.author.id, client.user.id, 'warn', '[AUTOMOD] Regex blacklist.').then( (infractionID) => {
+                            let WarnEmbed = new Discord.MessageEmbed()
+                            .setColor('#ff0000')
+                            .setTitle('New Infraction')
+                            .setAuthor(client.CONFIG.botName, client.CONFIG.botPicture)
+                            .setDescription('You have received an infraction in ' + message.guild.name + '.')
+                            .addField('Type', 'warn', true)
+                            .addField('Infraction ID', infractionID, true)
+                            .addField('Reason', '[AUTOMOD] Regex blacklist.' , true);
+            
+                            Store.getObject('infraction-log').then( (v) => {
+                                let InfractionEmbed = new Discord.MessageEmbed()
+                                    .setColor('#ff0000')
+                                    .setTitle('New warning for ' + message.author.tag)
+                                    .setAuthor(client.CONFIG.botName, client.CONFIG.botPicture)
+                                    .addField('Punished', message.author.tag + " (" + message.author.id + ")" , true)
+                                    .addField('Punisher', client.user.tag + " (" + client.user.id + ")", true)
+                                    .addField('Reason', '[AUTOMOD] Regex blacklist.' , true);
+                
+                                client.guilds.cache.get(message.guild.id).channels.cache.get(v[0].value.toString()).send(InfractionEmbed);
+                                
+                            });
+                
+                            client.users.cache.get(message.author.id).send(WarnEmbed).then( () => {
+                                Logger.log('Infraction alert sent to user ' + message.author.id + ' successfully.')
+                            }).catch( (err) => {
+                                Logger.error('Failed to send infraction alert to user ' + message.author.id + '.')
+                            })
+                
+                        })
+                    }
+                })
+            }
+        }).catch( (err) => {
+            Logger.error('Failed to do regexp whitelist.')
+            Logger.error(err);
+            console.log(err)
+        })
+        
         Store.getObject('message-log').then( (v) => {
             // v[0].value is the ID.
             var channelID = v[0].value.toString();
