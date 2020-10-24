@@ -398,7 +398,7 @@ try {
                         // Add infraction, warn user etc.
                         Logger.log('Regexp blacklist triggered over MESSAGE event, user ' + newmsg.author.id + ' on guild ' + newmsg.guild.id + ".")
             
-                        Store.addInfraction(message.author.id, client.user.id, 'warn', '[AUTOMOD] Regex blacklist.').then( (infractionID) => {
+                        Store.addInfraction(newmsg.author.id, client.user.id, 'warn', '[AUTOMOD] Regex blacklist.').then( (infractionID) => {
                             let WarnEmbed = new Discord.MessageEmbed()
                             .setColor('#ff0000')
                             .setTitle('New Infraction')
