@@ -361,7 +361,7 @@ try {
             //console.log(wlarray
 
             wlarray["whitelist"].forEach( (roleid) => {
-                if (message.member.roles.cache.get(roleid)) {
+                if (newmsg.member.roles.cache.get(roleid)) {
                     // Got it!
                     ok = true;
                 }
@@ -382,13 +382,13 @@ try {
                         let regex = rgBlacklist["blacklist"][i]
         
                         // Now that we have our regex we can check it against our string.
-                        let searching = message.content.search(regex);
+                        let searching = newmsg.content.search(regex);
                         //console.log(searching)
                         if (searching > -1) {
                             // Regex blacklist tripped.
                             //console.log('REGEX BLACKLIST TRIPPED')
         
-                            message.delete();
+                            newmsg.delete();
                             deleted = true;
                             
                         }
@@ -396,14 +396,14 @@ try {
         
                     if (deleted) {
                         // Add infraction, warn user etc.
-                        Logger.log('Regexp blacklist triggered over MESSAGE event, user ' + message.author.id + ' on guild ' + message.guild.id + ".")
+                        Logger.log('Regexp blacklist triggered over MESSAGE event, user ' + newmsg.author.id + ' on guild ' + newmsg.guild.id + ".")
             
                         Store.addInfraction(message.author.id, client.user.id, 'warn', '[AUTOMOD] Regex blacklist.').then( (infractionID) => {
                             let WarnEmbed = new Discord.MessageEmbed()
                             .setColor('#ff0000')
                             .setTitle('New Infraction')
                             .setAuthor(client.CONFIG.botName, client.CONFIG.botPicture)
-                            .setDescription('You have received an infraction in ' + message.guild.name + '.')
+                            .setDescription('You have received an infraction in ' + newmsg.guild.name + '.')
                             .addField('Type', 'warn', true)
                             .addField('Infraction ID', infractionID, true)
                             .addField('Reason', '[AUTOMOD] Regex blacklist.' , true);
@@ -411,20 +411,20 @@ try {
                             Store.getObject('infraction-log').then( (v) => {
                                 let InfractionEmbed = new Discord.MessageEmbed()
                                     .setColor('#ff0000')
-                                    .setTitle('New warning for ' + message.author.tag)
+                                    .setTitle('New warning for ' + newmsg.author.tag)
                                     .setAuthor(client.CONFIG.botName, client.CONFIG.botPicture)
-                                    .addField('Punished', message.author.tag + " (" + message.author.id + ")" , true)
-                                    .addField('Punisher', client.user.tag + " (" + client.user.id + ")", true)
+                                    .addField('Punished', newmsg.author.tag + " (" + newmsg.author.id + ")" , true)
+                                    .addField('Punisher', newmsg.user.tag + " (" + newmsg.user.id + ")", true)
                                     .addField('Reason', '[AUTOMOD] Regex blacklist.' , true);
                 
-                                client.guilds.cache.get(message.guild.id).channels.cache.get(v[0].value.toString()).send(InfractionEmbed);
+                                client.guilds.cache.get(newmsg.guild.id).channels.cache.get(v[0].value.toString()).send(InfractionEmbed);
                                 
                             });
                 
-                            client.users.cache.get(message.author.id).send(WarnEmbed).then( () => {
-                                Logger.log('Infraction alert sent to user ' + message.author.id + ' successfully.')
+                            client.users.cache.get(newmsg.author.id).send(WarnEmbed).then( () => {
+                                Logger.log('Infraction alert sent to user ' + newmsg.author.id + ' successfully.')
                             }).catch( (err) => {
-                                Logger.error('Failed to send infraction alert to user ' + message.author.id + '.')
+                                Logger.error('Failed to send infraction alert to user ' + newmsg.author.id + '.')
                             })
                 
                         })
