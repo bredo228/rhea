@@ -164,7 +164,7 @@ module.exports = function(client, Discord) {
                 // Role doesn't exist or things died.
                 // Either which way, panic!!!!!!!!!!
                 Logger.error('Failed to give member mute role, error below.')
-                Error.error(err)
+                Logger.error(err)
             }
         });
 
@@ -240,7 +240,7 @@ module.exports = function(client, Discord) {
                 // Role doesn't exist or things died.
                 // Either which way, panic!!!!!!!!!!
                 Logger.error('Failed to remove member mute role, error below.')
-                Error.error(err)
+                Logger.error(err)
             }
         });
 
