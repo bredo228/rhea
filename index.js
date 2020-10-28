@@ -128,7 +128,9 @@ try {
                         let regex = rgBlacklist["blacklist"][i]
         
                         // Now that we have our regex we can check it against our string.
-                        let searching = message.content.search(regex);
+                        let searching = message.content.toLowerCase();
+                        searching = searching.search(regex);
+                        
                         //console.log(searching)
                         if (searching > -1) {
                             // Regex blacklist tripped.
@@ -381,8 +383,9 @@ try {
                         // Iterate through blacklist
                         let regex = rgBlacklist["blacklist"][i]
         
-                        // Now that we have our regex we can check it against our string.
-                        let searching = newmsg.content.search(regex);
+                        let searching = message.content.toLowerCase();
+                        searching = searching.search(regex);
+                        
                         //console.log(searching)
                         if (searching > -1) {
                             // Regex blacklist tripped.
